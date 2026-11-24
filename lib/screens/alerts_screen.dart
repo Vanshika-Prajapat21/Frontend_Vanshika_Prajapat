@@ -11,6 +11,12 @@ import '../widgets/status_badge.dart';
 class AlertsScreen extends StatelessWidget {
   const AlertsScreen({super.key});
 
+  static const TextStyle _headerStyle = TextStyle(
+    color: AppColors.textPrimary,
+    fontSize: 14,
+    fontWeight: FontWeight.w600,
+  );
+
   @override
   Widget build(BuildContext context) {
     final logic = context.watch<AppLogic>();
@@ -79,97 +85,176 @@ class AlertsScreen extends StatelessWidget {
                     ),
                   )
                 else ...[
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(minWidth: 700),
-                      child: DataTable(
-                        columnSpacing: 24,
-                        horizontalMargin: 20,
-                        headingRowHeight: 48,
-                        dataRowMinHeight: 56,
-                        dataRowMaxHeight: 56,
-                        headingTextStyle: const TextStyle(
-                          color: AppColors.textPrimary,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        columns: const [
-                          DataColumn(label: Text('Threat Name')),
-                          DataColumn(label: Text('Severity')),
-                          DataColumn(label: Text('App')),
-                          DataColumn(label: Text('Device Model')),
-                          DataColumn(label: Text('Reported Time')),
-                          DataColumn(label: Text('Status')),
-                        ],
-                        rows: paginated.map((alert) {
-                          final app = logic.getAppById(alert.appId);
-                          final appName = app?.name ?? 'App';
-                          final appPlatform = app?.platform ?? 'Unknown';
+                  // Full-width table expanding across 100% of card width
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final double tableWidth =
+                          constraints.maxWidth > 750 ? constraints.maxWidth : 750;
 
-                          return DataRow(
-                            onSelectChanged: (_) {
-                              context.go('/alerts/${alert.id}');
-                            },
-                            cells: [
-                              DataCell(
-                                Text(
-                                  alert.threatDisplayName,
-                                  style: const TextStyle(
-                                    color: AppColors.textPrimary,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
+                      return SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: SizedBox(
+                          width: tableWidth,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              // Table Header Row
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 24, vertical: 14),
+                                decoration: const BoxDecoration(
+                                  border: Border(
+                                    bottom:
+                                        BorderSide(color: AppColors.divider),
                                   ),
                                 ),
-                              ),
-                              DataCell(SeverityChip(severity: alert.severity.label)),
-                              DataCell(
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
+                                child: const Row(
                                   children: [
-                                    Text(
-                                      appName,
-                                      style: const TextStyle(
-                                        color: AppColors.textPrimary,
-                                        fontSize: 14,
-                                      ),
+                                    Expanded(
+                                      flex: 24,
+                                      child: Text('Threat Name',
+                                          style: _headerStyle),
                                     ),
-                                    const SizedBox(width: 6),
-                                    PlatformBadge(platform: appPlatform),
+                                    Expanded(
+                                      flex: 12,
+                                      child:
+                                          Text('Severity', style: _headerStyle),
+                                    ),
+                                    Expanded(
+                                      flex: 18,
+                                      child: Text('App', style: _headerStyle),
+                                    ),
+                                    Expanded(
+                                      flex: 18,
+                                      child: Text('Device Model',
+                                          style: _headerStyle),
+                                    ),
+                                    Expanded(
+                                      flex: 20,
+                                      child: Text('Reported Time',
+                                          style: _headerStyle),
+                                    ),
+                                    Expanded(
+                                      flex: 12,
+                                      child: Text('Status', style: _headerStyle),
+                                    ),
                                   ],
                                 ),
                               ),
-                              DataCell(
-                                Text(
-                                  alert.deviceModel,
-                                  style: const TextStyle(
-                                    color: AppColors.textPrimary,
-                                    fontSize: 14,
-                                  ),
-                                ),
+
+                              // Table Data Rows
+                              ListView.separated(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: paginated.length,
+                                separatorBuilder: (_, __) =>
+                                    const Divider(color: AppColors.divider, height: 1),
+                                itemBuilder: (context, index) {
+                                  final alert = paginated[index];
+                                  final app = logic.getAppById(alert.appId);
+                                  final appName = app?.name ?? 'App';
+                                  final appPlatform = app?.platform ?? 'Unknown';
+
+                                  return InkWell(
+                                    onTap: () {
+                                      context.go('/alerts/${alert.id}');
+                                    },
+                                    hoverColor: Colors.black.withOpacity(0.015),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 24, vertical: 15),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            flex: 24,
+                                            child: Text(
+                                              alert.threatDisplayName,
+                                              style: const TextStyle(
+                                                color: AppColors.textPrimary,
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            flex: 12,
+                                            child: Align(
+                                              alignment: Alignment.centerLeft,
+                                              child: SeverityChip(
+                                                  severity:
+                                                      alert.severity.label),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            flex: 18,
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Flexible(
+                                                  child: Text(
+                                                    appName,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: const TextStyle(
+                                                      color:
+                                                          AppColors.textPrimary,
+                                                      fontSize: 14,
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 6),
+                                                PlatformBadge(
+                                                    platform: appPlatform),
+                                              ],
+                                            ),
+                                          ),
+                                          Expanded(
+                                            flex: 18,
+                                            child: Text(
+                                              alert.deviceModel,
+                                              style: const TextStyle(
+                                                color: AppColors.textPrimary,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            flex: 20,
+                                            child: Text(
+                                              alert.formattedReportedTime,
+                                              style: const TextStyle(
+                                                color: AppColors.textPrimary,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            flex: 12,
+                                            child: Align(
+                                              alignment: Alignment.centerLeft,
+                                              child: StatusBadge(
+                                                  status: alert.status),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
                               ),
-                              DataCell(
-                                Text(
-                                  alert.formattedReportedTime,
-                                  style: const TextStyle(
-                                    color: AppColors.textPrimary,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ),
-                              DataCell(StatusBadge(status: alert.status)),
                             ],
-                          );
-                        }).toList(),
-                      ),
-                    ),
+                          ),
+                        ),
+                      );
+                    },
                   ),
 
                   const Divider(color: AppColors.divider, height: 1),
 
-                  // Pagination footer
+                  // Pagination footer spanning 100% full width
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 14),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -185,15 +270,19 @@ class AlertsScreen extends StatelessWidget {
                           children: [
                             OutlinedButton.icon(
                               onPressed: logic.currentPage > 1
-                                  ? () => context.read<AppLogic>().previousPage()
+                                  ? () =>
+                                      context.read<AppLogic>().previousPage()
                                   : null,
                               icon: const Icon(Icons.chevron_left, size: 18),
                               label: const Text('Previous'),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: AppColors.textPrimary,
-                                side: const BorderSide(color: AppColors.cardBorder),
-                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                side: const BorderSide(
+                                    color: AppColors.cardBorder),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 14, vertical: 10),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8)),
                               ),
                             ),
                             const SizedBox(width: 10),
@@ -203,9 +292,12 @@ class AlertsScreen extends StatelessWidget {
                                   : null,
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: AppColors.textPrimary,
-                                side: const BorderSide(color: AppColors.cardBorder),
-                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                side: const BorderSide(
+                                    color: AppColors.cardBorder),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 14, vertical: 10),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8)),
                               ),
                               child: const Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -243,8 +335,10 @@ class AlertsScreen extends StatelessWidget {
             child: DropdownButton<String>(
               value: logic.selectedAppId,
               isDense: true,
-              style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
-              icon: const Icon(Icons.arrow_drop_down, color: AppColors.textSecondary),
+              style:
+                  const TextStyle(color: AppColors.textPrimary, fontSize: 13),
+              icon: const Icon(Icons.arrow_drop_down,
+                  color: AppColors.textSecondary),
               items: [
                 const DropdownMenuItem(value: 'ALL', child: Text('App: All')),
                 ...logic.apps.map(
@@ -270,12 +364,15 @@ class AlertsScreen extends StatelessWidget {
             child: DropdownButton<String>(
               value: logic.selectedSeverity,
               isDense: true,
-              style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
-              icon: const Icon(Icons.arrow_drop_down, color: AppColors.textSecondary),
+              style:
+                  const TextStyle(color: AppColors.textPrimary, fontSize: 13),
+              icon: const Icon(Icons.arrow_drop_down,
+                  color: AppColors.textSecondary),
               items: const [
                 DropdownMenuItem(value: 'ALL', child: Text('Severity: All')),
                 DropdownMenuItem(value: 'High', child: Text('Severity: High')),
-                DropdownMenuItem(value: 'Medium', child: Text('Severity: Medium')),
+                DropdownMenuItem(
+                    value: 'Medium', child: Text('Severity: Medium')),
                 DropdownMenuItem(value: 'Low', child: Text('Severity: Low')),
               ],
               onChanged: (val) {
@@ -294,12 +391,15 @@ class AlertsScreen extends StatelessWidget {
             child: DropdownButton<String>(
               value: logic.selectedStatus,
               isDense: true,
-              style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
-              icon: const Icon(Icons.arrow_drop_down, color: AppColors.textSecondary),
+              style:
+                  const TextStyle(color: AppColors.textPrimary, fontSize: 13),
+              icon: const Icon(Icons.arrow_drop_down,
+                  color: AppColors.textSecondary),
               items: const [
                 DropdownMenuItem(value: 'ALL', child: Text('Status: All')),
                 DropdownMenuItem(value: 'open', child: Text('Status: Open')),
-                DropdownMenuItem(value: 'resolved', child: Text('Status: Resolved')),
+                DropdownMenuItem(
+                    value: 'resolved', child: Text('Status: Resolved')),
               ],
               onChanged: (val) {
                 if (val != null) {
@@ -317,11 +417,16 @@ class AlertsScreen extends StatelessWidget {
             child: DropdownButton<String>(
               value: logic.sortBy,
               isDense: true,
-              style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
-              icon: const Icon(Icons.arrow_drop_down, color: AppColors.textSecondary),
+              style:
+                  const TextStyle(color: AppColors.textPrimary, fontSize: 13),
+              icon: const Icon(Icons.arrow_drop_down,
+                  color: AppColors.textSecondary),
               items: const [
-                DropdownMenuItem(value: 'NEWEST', child: Text('Sort: Newest first')),
-                DropdownMenuItem(value: 'SEVERITY', child: Text('Sort: Severity (High → Low)')),
+                DropdownMenuItem(
+                    value: 'NEWEST', child: Text('Sort: Newest first')),
+                DropdownMenuItem(
+                    value: 'SEVERITY',
+                    child: Text('Sort: Severity (High → Low)')),
               ],
               onChanged: (val) {
                 if (val != null) {
@@ -335,7 +440,8 @@ class AlertsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDropdownContainer({required String label, required Widget child}) {
+  Widget _buildDropdownContainer(
+      {required String label, required Widget child}) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
