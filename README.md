@@ -89,13 +89,12 @@ Tools • Dart 3.14.0 • DevTools 2.61.0
   - Google Antigravity Agent
   - Flutter SDK 3.50.1 command-line tools
 - **Two prompts I used**:
-  1. `"Design an immutable Alert model and repository layer in Flutter following clean architecture principles. The model should parse raw JSON with defensive null-safety (supplying fallback values for optional deviceModel and osVersion), normalize string severities into a strongly-typed AlertSeverity enum with rank indices for multi-tier sorting, and format timestamps via intl. Ensure the repository simulates asynchronous network latency with Future.delayed and includes a togglable error state for resilience testing."`
-  2. `"Implement a ChangeNotifier state manager using Provider that orchestrates multi-criterion filtering (App, Severity, Status), composite sorting (Newest timestamp, or Severity hierarchy with timestamp tie-breaker), and pagination (5 items/page). Ensure that modifying any active filter resets pagination to page 1, and alert resolution updates the item via copyWith, triggering reactive updates on both the Dashboard KPI cards and the Alerts table without screen reloads."`
+  1. `"Create the data models and repository for this Flutter app to read assets/alerts.json. Make sure the models handle missing fields like deviceModel and osVersion with default values, convert timestamps to readable dates using intl, and include a simulateError flag with a 1-second delay in the repository."`
+  2. `"Build an AppLogic class using ChangeNotifier and Provider to manage filters, sorting, and pagination. When any filter changes, reset the page to 1. Also add a resolveAlert method that updates the status so the Dashboard counts and Alerts table update immediately without refreshing the page."`
 - **One thing the AI got wrong, and how I found and fixed it**:
-  - The AI initially generated duplicate threat code mapping dictionaries in both `constants.dart` and `threat_names.dart`, violating DRY and Rule R6. Furthermore, it rendered an unconstrained `Row` for the threat title and badges in `AlertDetailScreen`, causing `RenderFlex` overflow exceptions on narrow viewports when displaying long strings like `"Hooking tool (like Frida)"`. I refactored the mapping into a single source of truth in `threat_names.dart` and replaced the `Row` with a responsive `Wrap` widget to gracefully handle variable-length text across viewports.
+  - The AI created duplicate threat name lists in two different files instead of keeping a single source of truth. It also used a normal `Row` for long threat names in the detail screen, which caused a layout overflow on smaller screens. I removed the duplicate list to keep one clean file and replaced the `Row` with a `Wrap` widget so it fits nicely on all screen sizes.
 - **One part I wrote or changed myself without AI**:
-  - Engineered the responsive table layout in `AlertsScreen`: replaced the standard `DataTable` (which constrained table width to 50% and caused layout issues) with a custom `LayoutBuilder` and proportional `Expanded` flex-row architecture, ensuring 100% full-width container utilization on desktop while preserving smooth horizontal scrolling on mobile viewports.
-
+  - I redesigned the alerts table layout using a custom flex row instead of the standard `DataTable`. This made the table stretch to 100% full width on desktop and added smooth horizontal scrolling on mobile screens so no text gets cut off.
 ---
 
 ## Questions
