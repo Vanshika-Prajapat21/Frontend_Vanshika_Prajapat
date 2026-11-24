@@ -12,10 +12,24 @@ class AlertRepository {
     // Wait 1 second to simulate server response
     await Future.delayed(const Duration(seconds: 1));
 
-    // If simulateError is true, throw an Exception.
-    // Also supports ?simulateError=true in URL for instantaneous live browser testing without recompile.
-    final bool isErrorActive =
-        simulateError || Uri.base.queryParameters['simulateError'] == 'true';
+    // Base check from code constant
+    bool isErrorActive = simulateError;
+
+    // Check live file state on disk or URL query parameter
+    try {
+      if (Uri.base.queryParameters['simulateError'] == 'true') {
+        isErrorActive = true;
+      } else {
+        final configStr =
+            await rootBundle.loadString('assets/config.json', cache: false);
+        final dynamic config = json.decode(configStr);
+        if (config is Map<String, dynamic> && config['simulateError'] == true) {
+          isErrorActive = true;
+        }
+      }
+    } catch (_) {
+      // Fallback gracefully to code constant
+    }
 
     if (isErrorActive) {
       throw Exception('Failed to load data from server (simulateError is enabled).');
