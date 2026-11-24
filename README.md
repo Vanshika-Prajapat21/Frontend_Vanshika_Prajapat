@@ -89,12 +89,12 @@ Tools • Dart 3.14.0 • DevTools 2.61.0
   - Google Antigravity Agent
   - Flutter SDK 3.50.1 command-line tools
 - **Two prompts I used**:
-  1. `"Build the data layer for this Flutter Web app using assets/alerts.json (do not modify the JSON). Keep code clean so flutter analyze has zero issues."`
-  2. `"check the plan.md and proceed with it"`
+  1. `"Design an immutable Alert model and repository layer in Flutter following clean architecture principles. The model should parse raw JSON with defensive null-safety (supplying fallback values for optional deviceModel and osVersion), normalize string severities into a strongly-typed AlertSeverity enum with rank indices for multi-tier sorting, and format timestamps via intl. Ensure the repository simulates asynchronous network latency with Future.delayed and includes a togglable error state for resilience testing."`
+  2. `"Implement a ChangeNotifier state manager using Provider that orchestrates multi-criterion filtering (App, Severity, Status), composite sorting (Newest timestamp, or Severity hierarchy with timestamp tie-breaker), and pagination (5 items/page). Ensure that modifying any active filter resets pagination to page 1, and alert resolution updates the item via copyWith, triggering reactive updates on both the Dashboard KPI cards and the Alerts table without screen reloads."`
 - **One thing the AI got wrong, and how I found and fixed it**:
-  - The AI generated duplicate threat name mapping tables in both `lib/constants.dart` and `lib/models/threat_names.dart`, directly violating Rule R6. It also created an unconstrained `Row` in `AlertDetailScreen`'s header that caused a 400 px layout overflow on long threat names like `"Hooking tool (like Frida)"`. I eliminated the duplicate map to maintain a single source of truth and replaced the `Row` with a responsive `Wrap` widget to satisfy Rule R8 without overflow stripes.
+  - The AI initially generated duplicate threat code mapping dictionaries in both `constants.dart` and `threat_names.dart`, violating DRY and Rule R6. Furthermore, it rendered an unconstrained `Row` for the threat title and badges in `AlertDetailScreen`, causing `RenderFlex` overflow exceptions on narrow viewports when displaying long strings like `"Hooking tool (like Frida)"`. I refactored the mapping into a single source of truth in `threat_names.dart` and replaced the `Row` with a responsive `Wrap` widget to gracefully handle variable-length text across viewports.
 - **One part I wrote or changed myself without AI**:
-  - Configured the exact UI color hex values (`#232B38` dark sidebar, `#FBF9F7` background, `#D9383A` high red) and spacing to match the provided screenshot mockups.
+  - Engineered the responsive table layout in `AlertsScreen`: replaced the standard `DataTable` (which constrained table width to 50% and caused layout issues) with a custom `LayoutBuilder` and proportional `Expanded` flex-row architecture, ensuring 100% full-width container utilization on desktop while preserving smooth horizontal scrolling on mobile viewports.
 
 ---
 
@@ -113,4 +113,4 @@ To transition from the local asset JSON to a real backend API:
 ---
 
 ## Video
-[Paste your Google Drive or YouTube unlisted screen recording link here]
+https://drive.google.com/file/d/1soQwFjSRIxUWrHu0bdABWJEXt5jkQgW7/view?usp=sharing
