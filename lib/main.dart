@@ -34,25 +34,31 @@ final _router = GoRouter(
       routes: [
         GoRoute(
           path: '/',
-          builder: (context, state) => const DashboardScreen(),
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: DashboardScreen(),
+          ),
         ),
         GoRoute(
           path: '/alerts',
-          builder: (context, state) => const AlertsScreen(),
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: AlertsScreen(),
+          ),
         ),
         GoRoute(
           path: '/alerts/:id',
-          builder: (context, state) {
+          pageBuilder: (context, state) {
             final logic = context.read<AppLogic>();
             final id = state.pathParameters['id']!;
             if (logic.alerts.isEmpty) {
-              return const AlertsScreen();
+              return const NoTransitionPage(child: AlertsScreen());
             }
             final alert = logic.alerts.firstWhere(
               (a) => a.id == id,
               orElse: () => logic.alerts.first,
             );
-            return AlertDetailScreen(alert: alert);
+            return NoTransitionPage(
+              child: AlertDetailScreen(alert: alert),
+            );
           },
         ),
       ],
