@@ -16,6 +16,11 @@ To run static analysis:
 flutter analyze
 ```
 
+To run unit tests:
+```bash
+flutter test
+```
+
 ### Flutter Version Output
 ```
 Flutter 3.50.1 • channel stable • https://github.com/flutter/flutter.git
@@ -29,11 +34,11 @@ Tools • Dart 3.14.0 • DevTools 2.61.0
 ## Project structure
 
 - `assets/alerts.json`: The mock JSON dataset containing apps and raw alert events.
-- `lib/constants.dart`: Design system constants including colors, spacing, and threat name mappings.
+- `lib/constants.dart`: Design system constants including colors and layout spacing.
 - `lib/data/alert_repository.dart`: Repository for loading and decoding `alerts.json` with 1-second delay simulation and error toggle.
 - `lib/models/app_info.dart`: Customer application model with `displayName` and formatted platform.
 - `lib/models/alert.dart`: Alert record model with `AlertSeverity` enum, `copyWith`, and `intl` local date formatting.
-- `lib/models/threat_names.dart`: Single source-of-truth lookup map and helper for threat codes.
+- `lib/models/threat_names.dart`: Single source-of-truth lookup map and helper for threat codes (Rule R6).
 - `lib/logic/app_logic.dart`: `ChangeNotifier` state manager handling filtering, sorting, pagination, and alert resolution.
 - `lib/screens/dashboard_screen.dart`: Screen 1 displaying total/open/high KPI cards and customer applications list.
 - `lib/screens/alerts_screen.dart`: Screen 2 displaying filter dropdowns, sort controls, and paginated alerts table.
@@ -44,6 +49,7 @@ Tools • Dart 3.14.0 • DevTools 2.61.0
 - `lib/widgets/platform_badge.dart`: Reusable platform pill badge displaying `iOS` or `Android`.
 - `lib/widgets/summary_card.dart`: Reusable KPI summary card widget for metric counts.
 - `lib/main.dart`: Root entry point setting up `ChangeNotifierProvider`, `GoRouter` declarative navigation, and theme.
+- `test/filter_sort_test.dart`: Unit tests covering metrics calculation, filtering, sorting, pagination, and resolution logic.
 
 ---
 
@@ -86,7 +92,7 @@ Tools • Dart 3.14.0 • DevTools 2.61.0
   1. `"Build the data layer for this Flutter Web app using assets/alerts.json (do not modify the JSON). Keep code clean so flutter analyze has zero issues."`
   2. `"check the plan.md and proceed with it"`
 - **One thing the AI got wrong, and how I found and fixed it**:
-  - Initially, `PlatformBadge` was declared in `status_badge.dart` while screen files attempted to import `widgets/platform_badge.dart`, causing an ambiguous import and unresolved identifier error during `flutter analyze`. I extracted `PlatformBadge` into its own dedicated file `lib/widgets/platform_badge.dart` and cleaned up `status_badge.dart`, achieving zero analysis warnings.
+  - The AI generated duplicate threat name mapping tables in both `lib/constants.dart` and `lib/models/threat_names.dart`, directly violating Rule R6. It also created an unconstrained `Row` in `AlertDetailScreen`'s header that caused a 400 px layout overflow on long threat names like `"Hooking tool (like Frida)"`. I eliminated the duplicate map to maintain a single source of truth and replaced the `Row` with a responsive `Wrap` widget to satisfy Rule R8 without overflow stripes.
 - **One part I wrote or changed myself without AI**:
   - Configured the exact UI color hex values (`#232B38` dark sidebar, `#FBF9F7` background, `#D9383A` high red) and spacing to match the provided screenshot mockups.
 
