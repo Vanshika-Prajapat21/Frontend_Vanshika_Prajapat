@@ -12,8 +12,12 @@ class AlertRepository {
     // Wait 1 second to simulate server response
     await Future.delayed(const Duration(seconds: 1));
 
-    // If simulateError is true, throw an Exception
-    if (simulateError) {
+    // If simulateError is true, throw an Exception.
+    // Also supports ?simulateError=true in URL for instantaneous live browser testing without recompile.
+    final bool isErrorActive =
+        simulateError || Uri.base.queryParameters['simulateError'] == 'true';
+
+    if (isErrorActive) {
       throw Exception('Failed to load data from server (simulateError is enabled).');
     }
 
