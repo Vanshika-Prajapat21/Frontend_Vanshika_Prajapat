@@ -85,8 +85,8 @@ class Alert {
 
   factory Alert.fromJson(Map<String, dynamic> json) {
     // Missing deviceModel -> "Unknown", missing osVersion -> "-"
-    final rawDevice = json['deviceModel'] as String?;
-    final rawOs = json['osVersion'] as String?;
+    final rawDevice = json['deviceModel']?.toString();
+    final rawOs = json['osVersion']?.toString();
 
     return Alert(
       id: json['id'] as String? ?? '',

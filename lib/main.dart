@@ -47,17 +47,9 @@ final _router = GoRouter(
         GoRoute(
           path: '/alerts/:id',
           pageBuilder: (context, state) {
-            final logic = context.read<AppLogic>();
             final id = state.pathParameters['id']!;
-            if (logic.alerts.isEmpty) {
-              return const NoTransitionPage(child: AlertsScreen());
-            }
-            final alert = logic.alerts.firstWhere(
-              (a) => a.id == id,
-              orElse: () => logic.alerts.first,
-            );
             return NoTransitionPage(
-              child: AlertDetailScreen(alert: alert),
+              child: _AlertDetailLoader(alertId: id),
             );
           },
         ),
@@ -65,6 +57,35 @@ final _router = GoRouter(
     ),
   ],
 );
+
+/// Handles deep-linking to an alert detail — waits for data to load first.
+class _AlertDetailLoader extends StatelessWidget {
+  final String alertId;
+
+  const _AlertDetailLoader({required this.alertId});
+
+  @override
+  Widget build(BuildContext context) {
+    final logic = context.watch<AppLogic>();
+
+    if (logic.isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.brandBlue),
+      );
+    }
+
+    if (logic.errorMessage != null) {
+      return const AlertsScreen();
+    }
+
+    final alert = logic.alerts.firstWhere(
+      (a) => a.id == alertId,
+      orElse: () => logic.alerts.first,
+    );
+
+    return AlertDetailScreen(alert: alert);
+  }
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

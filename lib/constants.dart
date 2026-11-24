@@ -49,19 +49,3 @@ class AppSpacing {
   static const double xl = 32.0;
   static const double sidebarWidth = 220.0;
 }
-
-/// Threat names lookup mapping as specified in the test instructions
-const Map<String, String> threatDisplayNames = {
-  'ROOT_DETECTED': 'Rooted device',
-  'JAILBREAK_DETECTED': 'Jailbroken iPhone',
-  'HOOKING_FRAMEWORK': 'Hooking tool (like Frida)',
-  'SCREEN_OVERLAY': 'Screen overlay',
-  'APP_TAMPERED': 'App was modified',
-  'EMULATOR': 'Running on an emulator',
-  'DEBUGGER_ATTACHED': 'Debugger attached',
-};
-
-/// Get friendly threat name or fallback to code as-is
-String getThreatDisplayName(String code) {
-  return threatDisplayNames[code] ?? code;
-}

@@ -128,8 +128,10 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
             builder: (context, constraints) {
               final isNarrow = constraints.maxWidth < 650;
 
-              final headerInfo = Row(
-                mainAxisSize: MainAxisSize.min,
+              final headerInfo = Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   Text(
                     alert.threatDisplayName,
@@ -139,9 +141,7 @@ class _AlertDetailScreenState extends State<AlertDetailScreen> {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  const SizedBox(width: 10),
                   SeverityChip(severity: alert.severity.label),
-                  const SizedBox(width: 8),
                   StatusBadge(status: alert.status),
                 ],
               );
